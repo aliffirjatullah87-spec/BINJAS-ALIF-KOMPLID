@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BINJAS ALIF</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f1115;color:#f5f5f5}
+.wrap{max-width:900px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+h1{margin:0;font-size:26px}.muted{color:#aeb4bf;font-size:13px}.card{background:#191c23;border:1px solid #292e38;border-radius:16px;padding:16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stat{font-size:25px;font-weight:800}.label{color:#aeb4bf;font-size:12px}
+button{border:0;border-radius:11px;padding:10px 13px;font-weight:700;cursor:pointer;background:#2b303b;color:white}.primary{background:#e8e8e8;color:#111}.danger{background:#49272c}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.pill{padding:5px 9px;border-radius:999px;background:#252a33;font-size:12px}
+.progress{height:10px;background:#292e38;border-radius:99px;overflow:hidden}.bar{height:100%;background:#f2f2f2;width:0}
+.task{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #292e38}.task:last-child{border:0}
+.task input{width:20px;height:20px;margin-top:2px}.task b{display:block}.task small{color:#aeb4bf}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}.tabs button{white-space:nowrap}.active{outline:2px solid #f2f2f2}
+textarea,input[type=text],input[type=number]{width:100%;background:#111318;color:#fff;border:1px solid #343a46;border-radius:10px;padding:10px}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px}.modal>div{max-width:500px;width:100%;background:#191c23;border-radius:16px;padding:18px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0f1115"></head>
+<body>
+<div class="wrap">
+<div class="top"><div><h1>🔥 BINJAS ALIF</h1><div class="muted">Program 3 bulan • Lari + Fisik + Konsistensi</div></div><button onclick="showSettings()">⚙️</button></div>
+<div class="tabs"><button class="active" onclick="tab('home',this)">🏠 Dashboard</button><button onclick="tab('week',this)">Mingguan</button><button onclick="tab('progress',this)">Progress</button><button onclick="tab('study',this)">📚 Belajar</button><button onclick="tab('prayer',this)">🕌 Sholat</button><button onclick="tab('rules',this)">Aturan</button></div>
+<section id="home"></section><section id="week" style="display:none"></section><section id="progress" style="display:none"></section><section id="study" style="display:none"></section><section id="prayer" style="display:none"></section><section id="rules" style="display:none"></section>
+</div>
+<div class="modal" id="modal"><div><div class="row"><h2>Pengaturan</h2><button onclick="hideSettings()">✕</button></div>
+<label>Berat badan sekarang (kg)</label><input id="weight" type="number" step="0.1"><br><br>
+<label>Catatan</label><textarea id="notes" rows="4" placeholder="Contoh: target tes, catatan latihan..."></textarea><br><br>
+<button class="primary" onclick="saveSettings()">Simpan</button></div></div>
+<script>
+const program={
+"2026-08-14":{run:"Setup aplikasi",time:"—",strength:"Mulai besok gunakan jadwal September–November yang sudah dibuat.",rest:"—"},
+};
+const months={};
+const strength={
+Sep:{1:"A: Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20",3:"B: Pull-up 5×5–7 • Push-up 4×15–18 • Sit-up 4×18–22",6:"C: Pull-up 3×submaks • Push-up 3×submaks • Sit-up 3×submaks",8:"B: Pull-up 5×5–7 • Push-up 4×15–18 • Sit-up 4×18–22",9:"A: Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20",13:"C: Pull-up 3×submaks • Push-up 3×submaks • Sit-up 3×submaks",15:"B: Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24",16:"A: Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22",20:"C: Pull-up 3×submaks • Push-up 3×submaks • Sit-up 3×submaks",22:"B: Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24",23:"A: Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22",27:"C: Pull-up 3×submaks • Push-up 3×submaks • Sit-up 3×submaks",29:"B: Pull-up 5×5–7 • Push-up 4×18–20 • Sit-up 4×20–25",30:"A: Pull-up 4×6–8 • Push-up 4×15–18 • Sit-up 4×20–24"},
+Oct:{4:"C: Pull-up 3×submaks • Push-up 3×20 • Sit-up 3×25",6:"B: Pull-up 4×6–8 • Push-up 3×20–25 • Sit-up 3×22–27",7:"A: Pull-up 5×6–8 • Push-up 4×16–20 • Sit-up 4×20–25",11:"C: Pull-up 3×submaks • Push-up 3×20 • Sit-up 3×25",13:"B: Pull-up 4×6–8 • Push-up 3×22–25 • Sit-up 3×25–28",14:"A: Pull-up 5×6–8 • Push-up 4×18–22 • Sit-up 4×22–25",18:"C: Pull-up 3×submaks • Push-up 3×20 • Sit-up 3×25",20:"B: Pull-up 4×6–8 • Push-up 3×22–27 • Sit-up 3×25–30",21:"A: Pull-up 5×7–9 • Push-up 4×18–22 • Sit-up 4×22–27",25:"C: Pull-up 3×submaks • Push-up 3×20 • Sit-up 3×25",27:"B: Pull-up 4×6–8 • 1 menit Push-up ×2 (28–35); 1 menit Sit-up ×2 (28–35)",28:"A: Pull-up 5×7–9 • Push-up 4×20–23 • Sit-up 4×23–27"},
+Nov:{1:"C: Pull-up 3×submaks • Push-up 2×30 • Sit-up 2×30",3:"B ringan: Pull-up 4×6–8 • 1 menit Push-up ×2 (30–36); 1 menit Sit-up ×2 (30–36)",4:"A: Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25",8:"C: Pull-up 3×submaks • Push-up 2×30 • Sit-up 2×30",10:"B ringan: Pull-up 4×6–8 • 1 menit Push-up ×2 (32–38); 1 menit Sit-up ×2 (32–38)",11:"A: Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25",15:"C: Pull-up 3×submaks • Push-up 2×30 • Sit-up 2×30",17:"B: Pull-up 4×7–9 • 1 menit Push-up ×2 (35–40); 1 menit Sit-up ×2 (35–40)",18:"A: Pull-up 4×8–10 • Push-up 4×20–25 • Sit-up 4×20–25",22:"C: Pull-up 3×submaks • Push-up 2×30 • Sit-up 2×30",24:"B sangat ringan: Pull-up 3×5–6 • 1 menit Push-up ×1 (30–35); 1 menit Sit-up ×1 (30–35)",25:"A ringan: Pull-up 3×6–8 • Push-up 3×18–20 • Sit-up 3×18–22",30:"TES: 1 menit Pull-up → Push-up → Sit-up • TARGET 21 / 45 / 45"}
+};
+const runs={
+Sep:{1:"Easy 5 km @ 5:50–6:30",2:"6×400 m @ 4:20–4:40",3:"Easy 4 km @ 5:50–6:30",5:"Long 7 km @ 6:00–6:30",6:"Recovery 4 km @ 6:20–6:50",8:"Tempo 3×1 km @ 5:10–5:30",9:"Easy 5 km @ 5:50–6:30",10:"8×400 m @ 4:20–4:40",12:"Long 8 km @ 6:00–6:30",13:"Recovery 4 km @ 6:20–6:50",15:"Tempo 4×1 km @ 5:10–5:30",16:"Easy 5 km @ 5:50–6:30",17:"5×600 m @ 4:20–4:40",19:"Long 9 km @ 6:00–6:30",20:"Easy 5 km @ 5:50–6:30",22:"Tempo 20 menit @ 5:10–5:30",23:"Easy 5 km @ 5:50–6:30",24:"10×400 m @ 4:20–4:40",26:"Long 8 km @ 6:00–6:30",27:"Recovery 4 km @ 6:20–6:50",29:"Tempo 3×1,2 km @ 5:10–5:30",30:"Easy 4 km @ 5:50–6:30"},
+Oct:{1:"6×400 m @ 4:00–4:20",3:"Long 9 km @ 5:50–6:20",4:"Easy 5 km @ 5:45–6:20",6:"Tempo 3×1 km @ 4:45–5:00",7:"Easy 5 km @ 5:45–6:20",8:"5×800 m @ 4:00–4:20",10:"Long 10 km @ 5:50–6:20",11:"Recovery 4 km @ 6:15–6:45",13:"Tempo 4×1 km @ 4:45–5:00",14:"Easy 5 km @ 5:45–6:20",15:"8×400 m @ 4:00–4:20",17:"Long 9 km @ 5:50–6:20",18:"Easy 5 km @ 5:45–6:20",20:"Tempo 20–25 mnt @ 4:45–5:00",21:"Easy 5 km @ 5:45–6:20",22:"6×600 m @ 4:00–4:20",24:"Long 10 km @ 5:50–6:20",25:"Recovery 4 km @ 6:15–6:45",27:"Tempo 3×1,5 km @ 4:45–5:00",28:"Easy 4 km @ 5:45–6:20",29:"10×400 m @ 4:00–4:20",31:"Long 8 km @ 5:50–6:20"},
+Nov:{1:"Easy 5 km @ 5:45–6:20",3:"5×600 m @ 3:45–4:00",4:"Easy 5 km @ 5:45–6:20",5:"Tempo 3×1 km @ 4:10–4:30",7:"Long 9 km @ 5:50–6:20",8:"Recovery 4 km @ 6:15–6:45",10:"8×400 m @ 3:45–4:00",11:"Easy 5 km @ 5:45–6:20",12:"Tempo 2×1,5 km @ 4:10–4:30",14:"Long 8 km @ 5:50–6:20",15:"Easy 4 km @ 5:45–6:20",17:"4×800 m @ 3:45–4:00",18:"Easy 5 km @ 5:45–6:20",19:"Tempo 3 km @ 4:10–4:30",21:"Long 7 km @ 5:50–6:20",22:"Recovery 4 km @ 6:15–6:45",24:"6×400 m @ 3:40–3:50",25:"Easy 4 km @ 5:45–6:20",26:"3×800 m @ 3:45–3:50",28:"Easy 5 km + strides",30:"TES 12 menit — target 3,2 km @ 3:45/km"}
+};
+function key(d){return d.toISOString().slice(0,10)}
+function getMonthKey(d){return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]}
+function time(d){
+let day=d.getDate(), m=getMonthKey(d);
+let maps={Sep:{1:"05.30",2:"05.15",3:"05.30",5:"05.00",6:"05.45",8:"05.15",9:"05.30",10:"05.15",12:"05.00",13:"05.45",15:"05.15",16:"05.30",17:"05.15",19:"05.00",20:"05.30",22:"05.15",23:"05.30",24:"05.15",26:"05.00",27:"05.45",29:"05.15",30:"05.30"},
+Oct:{1:"05.15",3:"05.00",4:"05.30",6:"05.15",7:"05.30",8:"05.15",10:"05.00",11:"05.45",13:"05.15",14:"05.30",15:"05.15",17:"05.00",18:"05.30",20:"05.15",21:"05.30",22:"05.15",24:"05.00",25:"05.45",27:"05.15",28:"05.30",29:"05.15",31:"05.00"},
+Nov:{1:"05.30",3:"05.15",4:"05.30",5:"05.15",7:"05.00",8:"05.45",10:"05.15",11:"05.30",12:"05.15",14:"05.00",15:"05.30",17:"05.15",18:"05.30",19:"05.15",21:"05.00",22:"05.45",24:"05.15",25:"05.30",26:"05.15",28:"05.30",30:"05.30"}};return (maps[m]||{})[day]||"—"}
+function todayData(){
+let d=new Date(); d.setHours(0,0,0,0); let m=getMonthKey(d), day=d.getDate();
+return {d,m,day,run:(runs[m]||{})[day]||"REST",strength:(strength[m]||{})[day]||"—",time:time(d)}
+}
+let checks=JSON.parse(localStorage.checks||"{}");
+let settings=JSON.parse(localStorage.settings||'{"weight":69,"notes":""}');
+function save(){localStorage.checks=JSON.stringify(checks);localStorage.settings=JSON.stringify(settings)}
+function isDone(k,i){return !!checks[k+"_"+i]}
+function toggle(k,i){checks[k+"_"+i]=!checks[k+"_"+i];save();render()}
+
+function dashboardSection(){
+ const d=new Date(), k=key(d);
+ const tasks=[];
+ let m=getMonthKey(d), day=d.getDate();
+ if((runs[m]||{})[day]) tasks.push("🏃 Lari");
+ if((strength[m]||{})[day]) tasks.push("💪 Strength");
+ const p=prayers[k]||[false,false,false,false,false], pd=p.filter(Boolean).length;
+ const sc=studyChecks[k]||[false,false,false], sd=sc.filter(Boolean).length;
+ const doneToday=Object.keys(checks).filter(x=>x.startsWith(k+"_")&&checks[x]).length;
+ const totalToday=(tasks.length?tasks.length:0);
+ const all=doneToday+pd+sd, max=totalToday+5+3;
+ const streakDays=new Set([...Object.keys(checks).filter(x=>checks[x]),...Object.keys(prayers).filter(x=>(prayers[x]||[]).some(Boolean)),...Object.keys(studyChecks).filter(x=>(studyChecks[x]||[]).some(Boolean))]);
+ return `<div class="card"><h2>🔥 Ringkasan Hari Ini</h2>
+ <div class="grid">
+ <div><div class="label">TARGET SELESAI</div><div class="stat">${all}/${max}</div></div>
+ <div><div class="label">STREAK HARI AKTIF</div><div class="stat">${streakDays.size} hari</div></div>
+ </div>
+ <div class="muted">${tasks.length?tasks.join(" • "):"😴 Tidak ada sesi fisik terjadwal"} • 🕌 Sholat ${pd}/5 • 📚 Belajar ${sd}/3</div>
+ </div>`;
+}
+
+function todayCard(){
+let x=todayData(), k=key(x.d), tasks=[];
+if(x.run!="REST") tasks.push(["🏃","Lari",x.run]); if(x.strength!="—") tasks.push(["💪","Strength",x.strength]); 
+tasks.push(["🧘","Cooldown","5–10 menit setelah latihan"]); 
+let done=tasks.filter((_,i)=>isDone(k,i)).length;
+return `<div class="card"><div class="row"><div><div class="muted">${x.d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div><h2 style="margin:4px 0">${x.run=="REST"?"😴 REST DAY":"🔥 HARI LATIHAN"}</h2></div><span class="pill">⏰ ${x.time}</span></div>
+<div class="progress"><div class="bar" style="width:${tasks.length?done/tasks.length*100:0}%"></div></div><div class="muted">${done}/${tasks.length} tugas selesai</div>
+${tasks.map((t,i)=>`<div class="task"><input type="checkbox" ${isDone(k,i)?"checked":""} onchange="toggle('${k}',${i})"><div><b>${t[0]} ${t[1]}</b><small>${t[2]}</small></div></div>`).join("")}
+<div class="card" style="margin:10px 0 0;background:#111318"><b>⏱️ Istirahat</b><div class="muted">Antar repetisi: tidak perlu. Antar set biasa: 1,5–2 menit. Set berat: 2–3 menit. Latihan 1 menit: 2–4 menit.</div></div></div>
+<div class="grid">
+<div class="card"><div class="label">BERAT BADAN</div><div class="stat">${settings.weight} kg</div></div>
+<div class="card"><div class="label">TARGET LARI</div><div class="stat">3,2 KM / 12:00</div><div class="muted">Pace target ± 3:45/km</div></div>
+<div class="card"><div class="label">TARGET FISIK</div><div class="stat">21 / 45 / 45</div><div class="muted">Pull-up / Push-up / Sit-up dalam 1 menit</div></div>
+</div>`
+}
+function week(){
+let now=new Date(); let monday=new Date(now); monday.setDate(now.getDate()-((now.getDay()+6)%7)); let html=`<div class="card"><h2>📋 Checklist Minggu Ini</h2><div class="muted">Target: minimal 5 hari latihan.</div>`;
+let count=0;
+for(let i=0;i<7;i++){let d=new Date(monday);d.setDate(monday.getDate()+i);let m=getMonthKey(d),day=d.getDate(),k=key(d);let active=(runs[m]||{})[day]||((strength[m]||{})[day]);let n=active?1:0; if(active){let done=Object.keys(checks).filter(z=>z.startsWith(k+"_")&&checks[z]).length; if(done>0)count++;}
+html+=`<div class="task"><div style="width:25px">${active?"🏃":"😴"}</div><div><b>${d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short'})}</b><small>${active?(runs[m]||{})[day]||"Strength":"Rest"}</small></div><span class="pill">${active?((Object.keys(checks).filter(z=>z.startsWith(k+"_")&&checks[z]).length>0)?"✅":"⬜"):"REST"}</span></div>`}
+html+=`<h3>Progress minggu: ${count}/7 hari aktif</h3><div class="progress"><div class="bar" style="width:${Math.min(count/5*100,100)}%"></div></div></div>`;return html}
+
+let runLogs=JSON.parse(localStorage.runLogs||"[]");
+let fitLogs=JSON.parse(localStorage.fitLogs||"[]");
+function saveRun(){
+ const date=document.getElementById("runDate").value||key(new Date());
+ const distance=parseFloat(document.getElementById("runDist").value)||0;
+ const minutes=parseFloat(document.getElementById("runTime").value)||0;
+ if(!distance||!minutes){alert("Isi jarak dan waktu lari dulu.");return}
+ runLogs.push({date,distance,minutes,pace:(minutes/distance).toFixed(2)});
+ localStorage.runLogs=JSON.stringify(runLogs);render();
+}
+function saveFit(){
+ const date=document.getElementById("fitDate").value||key(new Date());
+ const pull=parseInt(document.getElementById("fitPull").value)||0, push=parseInt(document.getElementById("fitPush").value)||0, sit=parseInt(document.getElementById("fitSit").value)||0;
+ if(!pull&&!push&&!sit){alert("Isi minimal satu hasil tes.");return}
+ fitLogs.push({date,pull,push,sit});localStorage.fitLogs=JSON.stringify(fitLogs);render();
+}
+function saveWeight(){
+ const w=parseFloat(document.getElementById("weightTrack").value);
+ if(!w)return; settings.weight=w; settings.weightLogs=settings.weightLogs||[]; settings.weightLogs.push({date:key(new Date()),weight:w});save();render();
+}
+function trackerSection(){
+ const lastRun=runLogs.length?runLogs[runLogs.length-1]:null, lastFit=fitLogs.length?fitLogs[fitLogs.length-1]:null;
+ return `<div class="card"><h3>🏃 Progress Lari</h3><div class="muted">Target: 3,2 km dalam 12 menit • pace ±3:45/km</div>
+ <div class="grid"><div><input id="runDate" type="text" value="${key(new Date())}" placeholder="Tanggal"></div><div><input id="runDist" type="number" step="0.01" placeholder="Jarak (km)"></div></div><br>
+ <input id="runTime" type="number" step="0.01" placeholder="Waktu (menit)"><br><br><button class="primary" onclick="saveRun()">Simpan Lari</button>
+ ${lastRun?`<p class="muted">Terakhir: ${lastRun.distance} km • ${lastRun.minutes} menit • pace ${lastRun.pace} menit/km</p>`:""}</div>
+ <div class="card"><h3>💪 Progress Tes Fisik</h3><div class="muted">Target: Pull-up 21 • Push-up 45 • Sit-up 45 dalam 1 menit</div>
+ <input id="fitDate" type="text" value="${key(new Date())}" placeholder="Tanggal"><br><br>
+ <div class="grid"><input id="fitPull" type="number" placeholder="Pull-up"><input id="fitPush" type="number" placeholder="Push-up"></div><br>
+ <input id="fitSit" type="number" placeholder="Sit-up"><br><br><button class="primary" onclick="saveFit()">Simpan Tes</button>
+ ${lastFit?`<p class="muted">Terakhir: ${lastFit.pull}/${lastFit.push}/${lastFit.sit}</p>`:""}</div>
+ <div class="card"><h3>⚖️ Progress Berat</h3><input id="weightTrack" type="number" step="0.1" value="${settings.weight}" placeholder="Berat (kg)"><br><br><button class="primary" onclick="saveWeight()">Simpan Berat</button></div>`;
+}
+
+function progress(){return `<div class="card"><h2>📈 Progress</h2>
+<div class="card" style="margin:0 0 12px;background:#111318">
+<b>🏃 TARGET LARI AKHIR</b>
+<div class="stat">3,2 km dalam 12 menit</div>
+<div class="muted">Pace rata-rata target: sekitar 3:45/km</div>
+</div>
+<div class="grid"><div><div class="label">BERAT AWAL</div><div class="stat">69 kg</div></div><div><div class="label">BERAT SEKARANG</div><div class="stat">${settings.weight} kg</div></div><div><div class="label">TARGET PULL-UP</div><div class="stat">21</div></div><div><div class="label">TARGET PUSH/SIT</div><div class="stat">45 / 45</div></div></div><p class="muted">Catat hasil tes 1 menit di sini lewat catatan atau pengaturan. Fokus utama: performa naik sambil menjaga berat badan secara sehat.</p></div>`}
+function rules(){return `<div class="card"><h2>🚨 Aturan Anti-Mager</h2><p><b>1. Aturan 10 menit / MODE MALAS:</b> saat malas, tekan prinsip minimum: lari 10–20 menit, strength 2 set, belajar minimal 20 menit. Yang penting jangan berhenti total.</p><p><b>2. Jangan bolos 2 hari berturut-turut.</b> Bolos 1 hari → besok kembali ke jadwal normal. Jangan membalas dengan latihan 2×.</p><p><b>3. Sakit/cedera:</b> recovery dulu, jangan dipaksakan.</p><p><b>4. Target mingguan:</b> minimal 5 sesi aktif.</p><p><b>5. Rutinitas malam:</b> setelah belajar, catat kesimpulan; 20.30 cek jadwal besok & siapkan perlengkapan; 21.30 mulai tidur.</p><hr><p><b>Target 30 November:</b> 🏃 3,2 km / 12 menit (pace ±3:45/km) + 💪 Pull-up 21 + Push-up 45 + Sit-up 45 dalam 1 menit.</p></div>`}
+
+let prayers=JSON.parse(localStorage.prayers||"{}");
+const prayerNames=["Subuh","Zuhur","Asar","Magrib","Isya"];
+function prayerKey(){let d=new Date(); return d.toISOString().slice(0,10)}
+function togglePrayer(i){let k=prayerKey(); if(!prayers[k]) prayers[k]=[false,false,false,false,false]; prayers[k][i]=!prayers[k][i]; localStorage.prayers=JSON.stringify(prayers); render()}
+
+let studyChecks=JSON.parse(localStorage.studyChecks||"{}");
+let studyOff=localStorage.studyOff||"Minggu";
+function studyKey(){let d=new Date(); return d.toISOString().slice(0,10)}
+function toggleStudy(i){let k=studyKey(); if(!studyChecks[k]) studyChecks[k]=[false,false,false]; studyChecks[k][i]=!studyChecks[k][i]; localStorage.studyChecks=JSON.stringify(studyChecks); render()}
+function setStudyOff(v){studyOff=v;localStorage.studyOff=v;render()}
+function studySection(){
+ let k=studyKey(), d=new Date(), day=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"][d.getDay()];
+ let arr=studyChecks[k]||[false,false,false];
+ if(day===studyOff) return `<div class="card"><h2>📚 Belajar — September</h2><div class="muted">Hari libur belajar: ${studyOff}</div><div class="card" style="background:#111318"><h3>😴 LIBUR</h3><p class="muted">Hari ini tidak ada checklist belajar. Satu hari libur per minggu.</p></div>
+ <label>Pilih hari libur mingguan</label><select onchange="setStudyOff(this.value)" style="width:100%;padding:10px;border-radius:10px;background:#111318;color:#fff;border:1px solid #343a46">
+ ${["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"].map(x=>`<option ${x===studyOff?"selected":""}>${x}</option>`).join("")}</select></div>`;
+ let tasks=["📖 Belajar / bimbel — 19.00–20.30","📝 Latihan soal / tugas — 20.30–20.45","🔁 Review singkat — 20.45–21.00"];
+ let done=arr.filter(Boolean).length;
+ return `<div class="card"><div class="row"><div><h2>📚 Belajar</h2><div class="muted">Mulai September • ${day} • Jam belajar utama 19.00–20.30</div></div><span class="pill">${done}/3 selesai</span></div>
+ <div class="progress"><div class="bar" style="width:${done/3*100}%"></div></div>
+ ${tasks.map((t,i)=>`<div class="task"><input type="checkbox" ${arr[i]?"checked":""} onchange="toggleStudy(${i})"><div><b>${t}</b><small>${arr[i]?"Selesai":"Belum selesai"}</small></div></div>`).join("")}
+ <div class="card" style="background:#111318;margin-bottom:12px"><b>⏰ Jadwal: 19.00–20.30</b><div class="muted">Slot belajar utama tetap 1,5 jam. Checklist review/tugas dicatat sebagai tambahan bila diperlukan.</div><br><b>📅 Hari libur mingguan: ${studyOff}</b><div class="muted">Lu hanya punya 1 hari libur belajar per minggu. Hari lain tetap checklist.</div></div>
+ <label>Pilih hari libur</label><select onchange="setStudyOff(this.value)" style="width:100%;padding:10px;border-radius:10px;background:#111318;color:#fff;border:1px solid #343a46">
+ ${["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"].map(x=>`<option ${x===studyOff?"selected":""}>${x}</option>`).join("")}</select></div>`;
+}
+
+
+let studyLogs=JSON.parse(localStorage.studyLogs||"[]");
+function addStudyLog(){
+ const date=document.getElementById("studyDate").value || new Date().toISOString().slice(0,10);
+ const subject=document.getElementById("studySubject").value.trim();
+ const material=document.getElementById("studyMaterial").value.trim();
+ const summary=document.getElementById("studySummary").value.trim();
+ const weak=document.getElementById("studyWeak").value.trim();
+ const hours=parseFloat(document.getElementById("studyHours").value)||0;
+ if(!subject||!material||!summary){alert("Isi mata pelajaran, materi, dan kesimpulan dulu ya bre.");return}
+ studyLogs.push({date,subject,material,summary,weak,hours});
+ localStorage.studyLogs=JSON.stringify(studyLogs);
+ render();
+}
+function deleteStudyLog(i){if(confirm("Hapus catatan ini?")){studyLogs.splice(i,1);localStorage.studyLogs=JSON.stringify(studyLogs);render()}}
+function studyLogSection(){
+ const days=new Set(studyLogs.map(x=>x.date)).size;
+ const hours=studyLogs.reduce((a,x)=>a+(Number(x.hours)||0),0);
+ const weak=[...new Set(studyLogs.flatMap(x=>x.weak?x.weak.split(",").map(s=>s.trim()).filter(Boolean):[]))];
+ return `<div class="card">
+ <h2>📚 Rekap Belajar 3 Bulan</h2>
+ <div class="grid">
+  <div><div class="label">TOTAL HARI BELAJAR</div><div class="stat">${days} hari</div></div>
+  <div><div class="label">TOTAL JAM BELAJAR</div><div class="stat">${hours.toFixed(1)} jam</div></div>
+ </div>
+ <h3>📝 Catat Setelah Belajar</h3>
+ <div class="muted">Isi ini setelah sesi 19.00–20.30 supaya semua materi tersimpan untuk rekap 3 bulan.</div><br>
+ <input id="studyDate" type="text" value="${new Date().toISOString().slice(0,10)}" placeholder="Tanggal YYYY-MM-DD"><br><br>
+ <input id="studySubject" type="text" placeholder="Mata pelajaran"><br><br>
+ <input id="studyMaterial" type="text" placeholder="Materi yang dipelajari"><br><br>
+ <textarea id="studySummary" rows="4" placeholder="Kesimpulan materi yang gua pahami..."></textarea><br><br>
+ <textarea id="studyWeak" rows="3" placeholder="Materi yang belum gua kuasai (pisahkan dengan koma jika lebih dari satu)"></textarea><br><br>
+ <input id="studyHours" type="number" step="0.1" min="0" placeholder="Durasi belajar (jam), contoh 1.5"><br><br>
+ <button class="primary" onclick="addStudyLog()">➕ Simpan Catatan</button>
+ </div>
+ <div class="card"><h3>🔴 Materi Belum Dikuasai</h3>
+ ${weak.length?weak.map(x=>`<div class="task"><div>🔴</div><div><b>${x}</b></div></div>`).join(""):"<div class="muted">Belum ada materi yang ditandai.</div>"}
+ </div>
+ <div class="card"><h3>📖 Kesimpulan Setiap Materi</h3>
+ ${studyLogs.length?studyLogs.slice().reverse().map((x,i)=>`<div class="task"><div><b>${x.subject} — ${x.material}</b><small>${x.date} • ${x.hours} jam</small><p style="margin:5px 0">${x.summary}</p>${x.weak?`<small>🔴 Belum dikuasai: ${x.weak}</small>`:""}</div><button class="danger" onclick="deleteStudyLog(${studyLogs.length-1-i})">Hapus</button></div>`).join(""):"<div class="muted">Belum ada catatan belajar.</div>"}
+ </div>`;
+}
+
+function prayerSection(){
+ let k=prayerKey(), arr=prayers[k]||[false,false,false,false,false];
+ let done=arr.filter(Boolean).length;
+ const times=["04:45","12:00","15:20","18:00","19:10"];
+ return `<div class="card"><div class="row"><div><h2>🕌 Sholat 5 Waktu</h2><div class="muted">Bekasi • ${new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div><span class="pill">${done}/5 selesai</span></div>
+ <div class="progress"><div class="bar" style="width:${done*20}%"></div></div>
+ ${prayerNames.map((p,i)=>`<div class="task"><input type="checkbox" ${arr[i]?"checked":""} onchange="togglePrayer(${i})"><div><b>🕌 ${p} <span class="pill">${times[i]}</span></b><small>${arr[i]?"Sudah ditandai":"Belum ditandai"}</small></div></div>`).join("")}
+ <div class="card" style="margin:12px 0 0;background:#111318"><b>📍 Lokasi: Bekasi</b><div class="muted">Jam di atas adalah jadwal referensi dan dapat berubah beberapa menit tiap hari. Untuk waktu harian yang presisi, aplikasi perlu sumber jadwal sholat otomatis.</div></div></div>`
+}
+
+function render(){document.getElementById("home").innerHTML=dashboardSection()+todayCard();document.getElementById("week").innerHTML=week();document.getElementById("progress").innerHTML=progress();document.getElementById("study").innerHTML=studySection()+studyLogSection();document.getElementById("prayer").innerHTML=prayerSection();document.getElementById("rules").innerHTML=rules()}
+function tab(id,btn){document.querySelectorAll("section").forEach(x=>x.style.display="none");document.getElementById(id).style.display="block";document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");}
+function showSettings(){document.getElementById("weight").value=settings.weight;document.getElementById("notes").value=settings.notes;document.getElementById("modal").style.display="flex"}
+function hideSettings(){document.getElementById("modal").style.display="none"}
+function saveSettings(){settings.weight=+document.getElementById("weight").value||69;settings.notes=document.getElementById("notes").value;save();hideSettings();render()}
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
