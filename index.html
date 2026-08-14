@@ -193,30 +193,25 @@ function studyLogSection(){
  const days=new Set(studyLogs.map(x=>x.date)).size;
  const hours=studyLogs.reduce((a,x)=>a+(Number(x.hours)||0),0);
  const weak=[...new Set(studyLogs.flatMap(x=>x.weak?x.weak.split(",").map(s=>s.trim()).filter(Boolean):[]))];
- return `<div class="card">
- <h2>📚 Rekap Belajar 3 Bulan</h2>
- <div class="grid">
-  <div><div class="label">TOTAL HARI BELAJAR</div><div class="stat">${days} hari</div></div>
-  <div><div class="label">TOTAL JAM BELAJAR</div><div class="stat">${hours.toFixed(1)} jam</div></div>
- </div>
- <h3>📝 Catat Setelah Belajar</h3>
- <div class="muted">Isi ini setelah sesi 19.00–20.30 supaya semua materi tersimpan untuk rekap 3 bulan.</div><br>
- <input id="studyDate" type="text" value="${new Date().toISOString().slice(0,10)}" placeholder="Tanggal YYYY-MM-DD"><br><br>
- <input id="studySubject" type="text" placeholder="Mata pelajaran"><br><br>
- <input id="studyMaterial" type="text" placeholder="Materi yang dipelajari"><br><br>
- <textarea id="studySummary" rows="4" placeholder="Kesimpulan materi yang gua pahami..."></textarea><br><br>
- <textarea id="studyWeak" rows="3" placeholder="Materi yang belum gua kuasai (pisahkan dengan koma jika lebih dari satu)"></textarea><br><br>
- <input id="studyHours" type="number" step="0.1" min="0" placeholder="Durasi belajar (jam), contoh 1.5"><br><br>
- <button class="primary" onclick="addStudyLog()">➕ Simpan Catatan</button>
- </div>
- <div class="card"><h3>🔴 Materi Belum Dikuasai</h3>
- ${weak.length?weak.map(x=>`<div class="task"><div>🔴</div><div><b>${x}</b></div></div>`).join(""):"<div class="muted">Belum ada materi yang ditandai.</div>"}
- </div>
- <div class="card"><h3>📖 Kesimpulan Setiap Materi</h3>
- ${studyLogs.length?studyLogs.slice().reverse().map((x,i)=>`<div class="task"><div><b>${x.subject} — ${x.material}</b><small>${x.date} • ${x.hours} jam</small><p style="margin:5px 0">${x.summary}</p>${x.weak?`<small>🔴 Belum dikuasai: ${x.weak}</small>`:""}</div><button class="danger" onclick="deleteStudyLog(${studyLogs.length-1-i})">Hapus</button></div>`).join(""):"<div class="muted">Belum ada catatan belajar.</div>"}
- </div>`;
+ const weakHtml=weak.length?weak.map(x=>'<div class="task"><div>🔴</div><div><b>'+x+'</b></div></div>').join(""):'<div class="muted">Belum ada materi yang ditandai.</div>';
+ const logsHtml=studyLogs.length?studyLogs.slice().reverse().map((x,i)=>{
+   const weakLine=x.weak?'<small>🔴 Belum dikuasai: '+x.weak+'</small>':'';
+   return '<div class="task"><div><b>'+x.subject+' — '+x.material+'</b><small>'+x.date+' • '+x.hours+' jam</small><p style="margin:5px 0">'+x.summary+'</p>'+weakLine+'</div><button class="danger" onclick="deleteStudyLog('+(studyLogs.length-1-i)+')">Hapus</button></div>';
+ }).join(""):'<div class="muted">Belum ada catatan belajar.</div>';
+ return '<div class="card"><h2>📚 Rekap Belajar 3 Bulan</h2>'+
+ '<div class="grid"><div><div class="label">TOTAL HARI BELAJAR</div><div class="stat">'+days+' hari</div></div>'+
+ '<div><div class="label">TOTAL JAM BELAJAR</div><div class="stat">'+hours.toFixed(1)+' jam</div></div></div>'+
+ '<h3>📝 Catat Setelah Belajar</h3><div class="muted">Isi setelah sesi 19.00–20.30 supaya semua materi tersimpan.</div><br>'+
+ '<input id="studyDate" type="text" value="'+new Date().toISOString().slice(0,10)+'" placeholder="Tanggal YYYY-MM-DD"><br><br>'+
+ '<input id="studySubject" type="text" placeholder="Mata pelajaran"><br><br>'+
+ '<input id="studyMaterial" type="text" placeholder="Materi yang dipelajari"><br><br>'+
+ '<textarea id="studySummary" rows="4" placeholder="Kesimpulan materi yang gua pahami..."></textarea><br><br>'+
+ '<textarea id="studyWeak" rows="3" placeholder="Materi yang belum gua kuasai"></textarea><br><br>'+
+ '<input id="studyHours" type="number" step="0.1" min="0" placeholder="Durasi belajar (jam), contoh 1.5"><br><br>'+
+ '<button class="primary" onclick="addStudyLog()">➕ Simpan Catatan</button></div>'+
+ '<div class="card"><h3>🔴 Materi Belum Dikuasai</h3>'+weakHtml+'</div>'+
+ '<div class="card"><h3>📖 Kesimpulan Setiap Materi</h3>'+logsHtml+'</div>';
 }
-
 function prayerSection(){
  let k=prayerKey(), arr=prayers[k]||[false,false,false,false,false];
  let done=arr.filter(Boolean).length;
@@ -235,5 +230,5 @@ function saveSettings(){settings.weight=+document.getElementById("weight").value
 render();
 </script>
 <script>
-if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script></body></html>
