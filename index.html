@@ -1,25 +1,154 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111318"><link rel="manifest" href="manifest.json"><title>BINJAS ALIF</title><style>body{margin:0;background:#0f1115;color:#f5f5f5;font-family:Arial,sans-serif}.wrap{max-width:850px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center}.tabs{display:flex;gap:7px;overflow:auto;margin:18px 0}.tabs button{white-space:nowrap}.card{background:#191c23;border:1px solid #2b303b;border-radius:15px;padding:16px;margin:12px 0}button{border:0;border-radius:10px;padding:10px 13px;background:#2a303b;color:white;font-weight:700;cursor:pointer}.active{outline:2px solid white}.primary{background:#eee;color:#111}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{font-size:25px;font-weight:800}.muted{color:#aeb4bf;font-size:13px}.task{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #2b303b}.task input{width:20px;height:20px}input,textarea,select{width:100%;padding:10px;background:#111318;color:white;border:1px solid #343a46;border-radius:9px;box-sizing:border-box}small{display:block;color:#aeb4bf;margin-top:4px}@media(max-width:600px){.grid{grid-template-columns:1fr}}.hide{display:none}.ok{color:#9ee493}</style></head><body><div class="wrap"><div class="top"><div><h1>🔥 BINJAS ALIF</h1><div class="muted">Program 3 bulan • Lari + Fisik + Belajar + Sholat</div></div><button id="settingsBtn">⚙️</button></div><div class="tabs" id="tabs"><button data-tab="home" class="active">🏠 Dashboard</button><button data-tab="week">📅 Mingguan</button><button data-tab="progress">📈 Progress</button><button data-tab="study">📚 Belajar</button><button data-tab="prayer">🕌 Sholat</button><button data-tab="rules">📌 Aturan</button></div><main id="app"></main></div><script>
-(function(){
-'use strict';
-var app=document.getElementById('app'),tabs=document.getElementById('tabs'),checks=JSON.parse(localStorage.getItem('checks')||'{}'),prayer=JSON.parse(localStorage.getItem('prayer')||'{}'),logs=JSON.parse(localStorage.getItem('studyLogs')||'[]'),runs=JSON.parse(localStorage.getItem('runLogs')||'[]'),fits=JSON.parse(localStorage.getItem('fitLogs')||'[]'),weight=localStorage.getItem('weight')||'69';
-function save(){localStorage.setItem('checks',JSON.stringify(checks));localStorage.setItem('prayer',JSON.stringify(prayer));localStorage.setItem('studyLogs',JSON.stringify(logs));localStorage.setItem('runLogs',JSON.stringify(runs));localStorage.setItem('fitLogs',JSON.stringify(fits));localStorage.setItem('weight',weight)}
-function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function month(){return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][new Date().getMonth()]}
-var runPlan={Sep:['Easy 5 km @ 5:50–6:30','6×400 m @ 4:20–4:40','Easy 4 km @ 5:50–6:30','Long 7 km @ 6:00–6:30','Recovery 4 km @ 6:20–6:50','Tempo 3×1 km @ 5:10–5:30','Easy 5 km @ 5:50–6:30'],Oct:['6×400 m @ 4:00–4:20','Long 9 km @ 5:50–6:20','Easy 5 km @ 5:45–6:20','Tempo 3×1 km @ 4:45–5:00','5×800 m @ 4:00–4:20','Long 10 km @ 5:50–6:20','Recovery 4 km @ 6:15–6:45'],Nov:['Easy 5 km @ 5:45–6:20','5×600 m @ 3:45–4:00','Tempo 3×1 km @ 4:10–4:30','Long 9 km @ 5:50–6:20','8×400 m @ 3:45–4:00','Recovery 4 km @ 6:15–6:45','TES 12 menit — target 3,2 km @ 3:45/km']};
-var strengthPlan={Sep:'Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20',Oct:'Pull-up 4×6–8 • Push-up 4×18–22 • Sit-up 4×22–27',Nov:'Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25'};
-function card(x){return '<div class="card">'+x+'</div>'}
-function task(id,text){return '<label class="task"><input type="checkbox" data-check="'+id+'" '+(checks[id]?'checked':'')+'><span>'+text+'</span></label>'}
-function home(){var k=today(),m=month(),done=Object.keys(checks).filter(function(x){return x.indexOf(k)==0&&checks[x]}).length;var r=runPlan[m];var rtext=r?r[new Date().getDay()]||r[0]:'Mulai program September';return card('<h2>📅 Hari Ini</h2><p>'+new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</p>'+task(k+'-run','🏃 '+rtext)+task(k+'-fit','💪 '+(strengthPlan[m]||'Strength sesuai fase program'))+task(k+'-study','📚 Belajar 19.00–20.30')+task(k+'-summary','📝 Tulis kesimpulan setelah belajar')+'<p class="muted">Checklist selesai hari ini: '+done+'</p>')+card('<h3>🎯 Target Tes Akhir</h3><div class="grid"><div><b>Pull-up</b><div class="stat">21 / 1 menit</div></div><div><b>Push-up</b><div class="stat">45 / 1 menit</div></div><div><b>Sit-up</b><div class="stat">45 / 1 menit</div></div><div><b>Lari</b><div class="stat">3,2 km / 12 menit</div></div></div>')+card('<h3>⚖️ Berat</h3><div class="stat">'+weight+' kg</div><p class="muted">Catat perubahan tanpa mengejar penurunan berat badan secara ekstrem.</p>')}
-function week(){var m=month();if(!runPlan[m])m='Sep';var r=runPlan[m]||[];var html='<h2>📅 Jadwal Mingguan — '+m+'</h2><p class="muted">Jadwal fase program berikutnya tetap ditampilkan supaya lu bisa siap-siap dari sekarang.</p>';r.forEach(function(x,i){html+=task('week-'+m+'-'+i,['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'][i]+': '+x)});html+=task('week-'+m+'-strength','💪 Strength: '+strengthPlan[m]+'<small>Centang setelah seluruh sesi strength selesai.</small>');html+='<p class="muted">💡 Satu hari libur penuh per minggu. Antar set strength istirahat 60–120 detik. Kalau bolos, lanjut jadwal berikutnya—jangan menggandakan volume.</p>';return card(html)}
-function progress(){var h=logs.reduce(function(a,x){return a+Number(x.hours||0)},0);return card('<h2>📈 Progress 3 Bulan</h2><div class="grid"><div><div class="muted">TOTAL HARI BELAJAR</div><div class="stat">'+new Set(logs.map(function(x){return x.date})).size+'</div></div><div><div class="muted">TOTAL JAM BELAJAR</div><div class="stat">'+h.toFixed(1)+'</div></div><div><div class="muted">CATATAN LARI</div><div class="stat">'+runs.length+'</div></div><div><div class="muted">TES FISIK</div><div class="stat">'+fits.length+'</div></div></div>')+card('<h3>🏃 Catat Lari</h3><input id="rd" type="number" step="0.01" placeholder="Jarak km"><br><br><input id="rt" type="number" step="0.01" placeholder="Waktu menit"><br><br><button class="primary" id="saveRun">Simpan Lari</button>')+card('<h3>💪 Catat Tes 1 Menit</h3><div class="grid"><input id="fp" type="number" placeholder="Pull-up"><input id="fu" type="number" placeholder="Push-up"></div><br><input id="fs" type="number" placeholder="Sit-up"><br><br><button class="primary" id="saveFit">Simpan Tes</button>')}
-function study(){var h=logs.reduce(function(a,x){return a+Number(x.hours||0)},0),out=card('<h2>📚 Belajar 19.00–20.30</h2><p>Total hari: <b>'+new Set(logs.map(function(x){return x.date})).size+'</b> • Total jam: <b>'+h.toFixed(1)+'</b></p><input id="sub" placeholder="Mata pelajaran"><br><br><input id="mat" placeholder="Materi"><br><br><textarea id="sum" rows="4" placeholder="Kesimpulan materi setelah belajar"></textarea><br><br><textarea id="weak" rows="3" placeholder="Materi yang belum dikuasai"></textarea><br><br><input id="hrs" type="number" step="0.1" placeholder="Durasi jam, contoh 1.5"><br><br><button class="primary" id="saveStudy">Simpan Catatan</button>');if(logs.length){out+=card('<h3>📝 Rekap</h3>'+logs.slice().reverse().map(function(x){return '<div class="task"><span><b>'+x.subject+' — '+x.material+'</b><small>'+x.date+' • '+x.hours+' jam<br>Kesimpulan: '+x.summary+'<br>Belum dikuasai: '+(x.weak||'-')+'</small></span></div>'}).join(''))}return out}
-function prayers(){var k=today(),p=prayer[k]||{};return card('<h2>🕌 Sholat 5 Waktu</h2>'+['Subuh','Dzuhur','Ashar','Maghrib','Isya'].map(function(n){return '<label class="task"><input type="checkbox" data-prayer="'+n+'" '+(p[n]?'checked':'')+'><span>'+n+'</span></label>'}).join('')+'<p class="muted">Waktu mengikuti jadwal sholat setempat di Bekasi.</p>')}
-function rules(){return card('<h2>📌 Aturan Konsistensi</h2><p>• Mood jelek: lakukan versi minimum, jangan nol total.</p><p>• Antar set: istirahat 60–120 detik.</p><p>• Kalau bolos: lanjut jadwal berikutnya, jangan balas dengan latihan dua kali lipat.</p><p>• Libur penuh: 1 hari per minggu.</p><p>• Belajar: 19.00–20.30, lalu tulis kesimpulan + materi yang belum dikuasai.</p>')}
-function render(name){try{app.innerHTML=name==='home'?home():name==='week'?week():name==='progress'?progress():name==='study'?study():name==='prayer'?prayers():rules()}catch(e){app.innerHTML=card('<h2>⚠️ Error aplikasi</h2><p>'+String(e)+'</p><button onclick="location.reload()">Reload</button>');console.error(e)}}
-tabs.addEventListener('click',function(e){var b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active')});b.classList.add('active');render(b.dataset.tab)});
-app.addEventListener('change',function(e){if(e.target.dataset.check){checks[e.target.dataset.check]=e.target.checked;save();}if(e.target.dataset.prayer){var k=today(),p=prayer[k]||{};p[e.target.dataset.prayer]=e.target.checked;prayer[k]=p;save();}});
-app.addEventListener('click',function(e){if(e.target.id==='saveStudy'){logs.push({date:today(),subject:document.getElementById('sub').value,material:document.getElementById('mat').value,summary:document.getElementById('sum').value,weak:document.getElementById('weak').value,hours:document.getElementById('hrs').value});save();render('study')}if(e.target.id==='saveRun'){var d=Number(document.getElementById('rd').value),t=Number(document.getElementById('rt').value);if(d&&t){runs.push({date:today(),distance:d,minutes:t,pace:(t/d).toFixed(2)});save();render('progress')}}if(e.target.id==='saveFit'){fits.push({date:today(),pull:document.getElementById('fp').value,push:document.getElementById('fu').value,sit:document.getElementById('fs').value});save();render('progress')}});
-document.getElementById('settingsBtn').addEventListener('click',function(){var w=prompt('Berat badan sekarang (kg):',weight);if(w){weight=w;save();render('home')}});
-render('home');
-})();
-</script><script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){})}</script></body></html>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080b12"><link rel="manifest" href="manifest.json"><title>BINJAS ALIF • 3 Month Mission</title><style>:root{--bg:#070910;--card:#111622;--card2:#171d2b;--line:#273044;--txt:#f7f8fb;--muted:#8f9bb0;--accent:#8bff6a;--accent2:#65d7ff;--warn:#ffd166;--danger:#ff6b7a}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#17243d 0,transparent 35%),radial-gradient(circle at 90% 10%,#182c25 0,transparent 30%),var(--bg);color:var(--txt);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:980px;margin:auto;padding:16px 14px 90px}.hero{padding:20px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,#121927dd,#0d111bdd);box-shadow:0 18px 50px #0006}.heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.brand{font-size:13px;color:var(--accent);font-weight:900;letter-spacing:1.8px}.hero h1{font-size:31px;line-height:1.05;margin:7px 0}.sub{color:var(--muted);font-size:13px}.target{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}.target div{background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:10px}.target b{display:block;font-size:18px}.target small{color:var(--muted)}button{font:inherit;border:0;color:var(--txt);background:var(--card2);border:1px solid var(--line);padding:10px 13px;border-radius:12px;font-weight:800;cursor:pointer}button:active{transform:scale(.98)}.primary{background:linear-gradient(135deg,var(--accent),#55e0a4);color:#071008;border:0}.tabs{position:sticky;top:0;z-index:5;display:flex;gap:7px;overflow:auto;padding:12px 0;background:#070910e8;backdrop-filter:blur(14px)}.tabs button{white-space:nowrap}.tabs .on{border-color:var(--accent);color:var(--accent)}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{background:linear-gradient(180deg,#121826,#0e131e);border:1px solid var(--line);border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 10px 30px #0003}.card h2,.card h3{margin:0 0 10px}.muted{color:var(--muted)}.big{font-size:28px;font-weight:950}.eyebrow{font-size:11px;letter-spacing:1.2px;color:var(--muted);font-weight:900}.today{border-color:#5e8f55;background:linear-gradient(135deg,#122119,#111826)}.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:99px;background:#ffffff0a;border:1px solid #ffffff12;font-size:12px;font-weight:800}.pillRest{color:#aab3c4}.pillRun{color:var(--accent2)}.pillStrength{color:var(--warn)}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.task{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #ffffff0d}.task:last-child{border:0}.task input{width:21px;height:21px;accent-color:var(--accent);margin-top:2px}.task b{display:block}.task small{display:block;color:var(--muted);margin-top:4px;line-height:1.45}.bar{height:10px;border-radius:99px;background:#202838;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.dow{text-align:center;color:var(--muted);font-size:11px;font-weight:900;padding:4px}.day{min-height:78px;background:#0d131e;border:1px solid var(--line);border-radius:12px;padding:7px;cursor:pointer}.day:hover{border-color:#63708a}.day.rest{opacity:.55}.day.sel{border-color:var(--accent);box-shadow:0 0 0 1px #8bff6a44}.day.done{background:#122116}.dayNum{font-weight:900}.dayType{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.2}.dayCheck{color:var(--accent);font-size:12px}.monthTitle{font-size:20px;font-weight:950;margin:18px 0 8px}.selectRow{display:flex;gap:8px;overflow:auto}.selectRow button{flex:1;min-width:90px}.selectRow .on{background:#17251b;border-color:var(--accent);color:var(--accent)}input,textarea{width:100%;background:#0a0e16;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:11px;font:inherit}textarea{resize:vertical}.note{padding:11px 13px;border-radius:13px;background:#ffffff06;border:1px solid #ffffff0d;color:#c6cfdd;line-height:1.5}.metric{background:#ffffff06;border:1px solid #ffffff0d;border-radius:15px;padding:12px}.metric b{font-size:21px}.danger{color:var(--danger)}.footer{text-align:center;color:var(--muted);font-size:11px;margin-top:24px}@media(max-width:650px){.app{padding:10px 10px 80px}.hero{padding:17px}.hero h1{font-size:26px}.target{grid-template-columns:repeat(2,1fr)}.grid,.grid4{grid-template-columns:1fr}.calendar{gap:4px}.day{min-height:65px;padding:5px}.dayType{font-size:9px}.tabs{margin:0 -10px;padding-left:10px;padding-right:10px}.card{border-radius:17px}}
+</style></head><body><div class="app"><section class="hero"><div class="heroTop"><div><div class="brand">BINJAS ALIF // MISSION 90+1</div><h1>Build. Run. Repeat. 🔥</h1><div class="sub">September–November 2026 • program PDF sebagai patokan utama</div></div><button id="weightBtn">⚖️ <span id="weightLabel">69 kg</span></button></div><div class="target"><div><b>3,2 km</b><small>12:00</small></div><div><b>21</b><small>Pull-up / 1 menit</small></div><div><b>45</b><small>Push-up / 1 menit</small></div><div><b>45</b><small>Sit-up / 1 menit</small></div></div></section><nav class="tabs" id="tabs"><button data-view="home" class="on">🏠 Home</button><button data-view="calendar">🗓️ Calendar</button><button data-view="week">📅 Mingguan</button><button data-view="progress">📈 Progress</button><button data-view="study">📚 Belajar</button><button data-view="prayer">🕌 Sholat</button><button data-view="rules">⚡ Rules</button></nav><main id="view"></main><div class="footer">BINJAS ALIF • tetap konsisten, bukan sempurna.</div></div><script>(function(){'use strict';
+const V=document.getElementById('view'),T=document.getElementById('tabs');
+const KEY='binjas_v3';let db=JSON.parse(localStorage.getItem(KEY)||'{}');db.checks=db.checks||{};db.study=db.study||[];db.runs=db.runs||[];db.fits=db.fits||[];db.weight=db.weight||69;db.prayers=db.prayers||{};
+function save(){localStorage.setItem(KEY,JSON.stringify(db));document.getElementById('weightLabel').textContent=db.weight+' kg'}
+const raw=`2026-09-01|Selasa|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-02|Rabu|05.15|6×400 m @ 4:20–4:40|—
+2026-09-03|Kamis|05.30|Easy 4 km @ 5:50–6:30|B
+2026-09-04|Jumat|—|REST|—
+2026-09-05|Sabtu|05.00|Long 7 km @ 6:00–6:30|—
+2026-09-06|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-07|Senin|—|REST|—
+2026-09-08|Selasa|05.15|Tempo 3×1 km @ 5:10–5:30|B
+2026-09-09|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-10|Kamis|05.15|8×400 m @ 4:20–4:40|—
+2026-09-11|Jumat|—|REST|—
+2026-09-12|Sabtu|05.00|Long 8 km @ 6:00–6:30|—
+2026-09-13|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-14|Senin|—|REST|—
+2026-09-15|Selasa|05.15|Tempo 4×1 km @ 5:10–5:30|B
+2026-09-16|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-17|Kamis|05.15|5×600 m @ 4:20–4:40|—
+2026-09-18|Jumat|—|REST|—
+2026-09-19|Sabtu|05.00|Long 9 km @ 6:00–6:30|—
+2026-09-20|Minggu|05.30|Easy 5 km @ 5:50–6:30|C
+2026-09-21|Senin|—|REST|—
+2026-09-22|Selasa|05.15|Tempo 20 menit @ 5:10–5:30|B
+2026-09-23|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-24|Kamis|05.15|10×400 m @ 4:20–4:40|—
+2026-09-25|Jumat|—|REST|—
+2026-09-26|Sabtu|05.00|Long 8 km @ 6:00–6:30|—
+2026-09-27|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-28|Senin|—|REST|—
+2026-09-29|Selasa|05.15|Tempo 3×1,2 km @ 5:10–5:30|B
+2026-09-30|Rabu|05.30|Easy 4 km @ 5:50–6:30|A
+2026-10-01|Kamis|05.15|6×400 m @ 4:00–4:20|—
+2026-10-02|Jumat|—|REST|—
+2026-10-03|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-10-04|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-10-05|Senin|—|REST|—
+2026-10-06|Selasa|05.15|Tempo 3×1 km @ 4:45–5:00|B
+2026-10-07|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-08|Kamis|05.15|5×800 m @ 4:00–4:20|—
+2026-10-09|Jumat|—|REST|—
+2026-10-10|Sabtu|05.00|Long 10 km @ 5:50–6:20|—
+2026-10-11|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-10-12|Senin|—|REST|—
+2026-10-13|Selasa|05.15|Tempo 4×1 km @ 4:45–5:00|B
+2026-10-14|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-15|Kamis|05.15|8×400 m @ 4:00–4:20|—
+2026-10-16|Jumat|—|REST|—
+2026-10-17|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-10-18|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-10-19|Senin|—|REST|—
+2026-10-20|Selasa|05.15|Tempo 20–25 mnt @ 4:45–5:00|B
+2026-10-21|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-22|Kamis|05.15|6×600 m @ 4:00–4:20|—
+2026-10-23|Jumat|—|REST|—
+2026-10-24|Sabtu|05.00|Long 10 km @ 5:50–6:20|—
+2026-10-25|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-10-26|Senin|—|REST|—
+2026-10-27|Selasa|05.15|Tempo 3×1,5 km @ 4:45–5:00|B
+2026-10-28|Rabu|05.30|Easy 4 km @ 5:45–6:20|A
+2026-10-29|Kamis|05.15|10×400 m @ 4:00–4:20|—
+2026-10-30|Jumat|—|REST|—
+2026-10-31|Sabtu|05.00|Long 8 km @ 5:50–6:20|—
+2026-11-01|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-11-02|Senin|—|REST|—
+2026-11-03|Selasa|05.15|5×600 m @ 3:45–4:00|B ringan
+2026-11-04|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-05|Kamis|05.15|Tempo 3×1 km @ 4:10–4:30|—
+2026-11-06|Jumat|—|REST|—
+2026-11-07|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-11-08|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-11-09|Senin|—|REST|—
+2026-11-10|Selasa|05.15|8×400 m @ 3:45–4:00|B ringan
+2026-11-11|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-12|Kamis|05.15|Tempo 2×1,5 km @ 4:10–4:30|—
+2026-11-13|Jumat|—|REST|—
+2026-11-14|Sabtu|05.00|Long 8 km @ 5:50–6:20|—
+2026-11-15|Minggu|05.30|Easy 4 km @ 5:45–6:20|C
+2026-11-16|Senin|—|REST|—
+2026-11-17|Selasa|05.15|4×800 m @ 3:45–4:00|B
+2026-11-18|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-19|Kamis|05.15|Tempo 3 km @ 4:10–4:30|—
+2026-11-20|Jumat|—|REST|—
+2026-11-21|Sabtu|05.00|Long 7 km @ 5:50–6:20|—
+2026-11-22|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-11-23|Senin|—|REST|—
+2026-11-24|Selasa|05.15|6×400 m @ 3:40–3:50|B sangat ringan
+2026-11-25|Rabu|05.30|Easy 4 km @ 5:45–6:20|A ringan
+2026-11-26|Kamis|05.15|3×800 m @ 3:45–3:50|—
+2026-11-27|Jumat|—|REST TOTAL|—
+2026-11-28|Sabtu|05.30|Easy 5 km + strides|—
+2026-11-29|Minggu|—|REST TOTAL|—
+2026-11-30|Senin|05.30|TES 12 MENIT — TARGET 3,2 KM @ 3:45/km|TES 21 / 45 / 45`;
+const plan={};raw.trim().split('\n').forEach(x=>{let[a,b,c,d,e]=x.split('|');plan[a]={day:b,time:c,run:d,strength:e}});
+const sraw=`2026-09-01|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-03|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-06|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-08|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-09|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-13|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-15|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-16|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-20|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-22|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-23|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-27|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-29|B|Pull-up 5×5–7 • Push-up 4×18–20 • Sit-up 4×20–25
+2026-09-30|A|Pull-up 4×6–8 • Push-up 4×15–18 • Sit-up 4×20–24
+2026-10-04|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-06|B|Pull-up 5×5–7 • Push-up 3×20–25 • Sit-up 3×22–27
+2026-10-07|A|Pull-up 5×6–8 • Push-up 4×16–20 • Sit-up 4×20–25
+2026-10-11|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-13|B|Pull-up 4×6–8 • Push-up 3×22–25 • Sit-up 3×25–28
+2026-10-14|A|Pull-up 5×6–8 • Push-up 4×18–22 • Sit-up 4×22–25
+2026-10-18|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-20|B|Pull-up 4×6–8 • Push-up 3×22–27 • Sit-up 3×25–30
+2026-10-21|A|Pull-up 5×7–9 • Push-up 4×18–22 • Sit-up 4×22–27
+2026-10-25|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-27|B|Pull-up 4×6–8 • 1 menit push-up ×2 (28–35/set) • 1 menit sit-up ×2 (28–35/set)
+2026-10-28|A|Pull-up 5×7–9 • Push-up 4×20–23 • Sit-up 4×23–27
+2026-11-01|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-03|B ringan|Pull-up 4×6–8 • 1 menit push-up ×2 (30–36) • 1 menit sit-up ×2 (30–36)
+2026-11-04|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-08|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-10|B ringan|Pull-up 4×6–8 • 1 menit push-up ×2 (32–38) • 1 menit sit-up ×2 (32–38)
+2026-11-11|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-15|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-17|B|Pull-up 4×7–9 • 1 menit push-up ×2 (35–40) • 1 menit sit-up ×2 (35–40)
+2026-11-18|A|Pull-up 4×8–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-22|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-24|B sangat ringan|Pull-up 3×5–6 • 1 menit push-up ×1 (30–35) • 1 menit sit-up ×1 (30–35)
+2026-11-25|A ringan|Pull-up 3×6–8 • Push-up 3×18–20 • Sit-up 3×18–22
+2026-11-28|—|Tidak ada strength
+2026-11-30|TES|1 menit Pull-up → istirahat 5–10 menit → 1 menit Push-up → istirahat 5–10 menit → 1 menit Sit-up • Target 21/45/45`;
+const strength={};sraw.trim().split('\n').forEach(x=>{let[a,b,c]=x.split('|');strength[a]={type:b,text:c}});
+const dow=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+function iso(d){return d.toISOString().slice(0,10)}function parse(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}function fmt(s){return parse(s).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}function checked(k){return !!db.checks[k]}function toggle(k){db.checks[k]=!db.checks[k];save();render(current)}
+function setCurrent(s){current=s||iso(new Date());}
+let current=iso(new Date());if(current<'2026-09-01')current='2026-09-01';if(current>'2026-11-30')current='2026-11-30';
+function dayData(s){return plan[s]||{day:parse(s).toLocaleDateString('id-ID',{weekday:'long'}),time:'—',run:'REST',strength:'—'}}
+function heroDay(s){let p=dayData(s),st=strength[s];let rest=p.run==='REST'||p.run==='REST TOTAL';return '<div class="card today"><div class="row"><div><div class="eyebrow">'+(s===iso(new Date())?'HARI INI':'TANGGAL DIPILIH')+'</div><h2>'+fmt(s)+'</h2></div><span class="badge '+(rest?'pillRest':'pillRun')+'">'+(rest?'😴 REST':'🏃 '+p.time)+'</span></div><div class="note">'+(rest?'Recovery / libur sesuai PDF.':p.run)+'</div>'+(!rest?'<div class="row" style="margin-top:10px"><span class="badge pillRun">⏰ '+p.time+' WIB</span><span class="badge">PACE sesuai PDF</span></div>':'')+(st&&st.type!=='—'?'<div class="note" style="margin-top:10px"><b>💪 Strength '+st.type+'</b><br>'+st.text+'</div>':'')+(p.run.includes('TES')?'<div class="note" style="margin-top:10px;border-color:#ffd16655">🏆 TES AKHIR • 3,2 km/12:00 + 21 Pull-up + 45 Push-up + 45 Sit-up</div>':'')+task(s+'-day','Selesai latihan / recovery hari ini',checked(s+'-day'))+'</div>'}
+function task(id,text,is){return '<label class="task"><input type="checkbox" data-id="'+id+'" '+(is?'checked':'')+'><span><b>'+text+'</b></span></label>'}
+function home(){let s=iso(new Date());if(s<'2026-09-01')s='2026-09-01';if(s>'2026-11-30')s='2026-11-30';let total=Object.values(db.checks).filter(Boolean).length;let days=Math.max(0,Math.ceil((parse('2026-11-30')-new Date())/86400000));return heroDay(s)+card('<div class="row"><div><div class="eyebrow">COUNTDOWN</div><div class="big">'+days+' hari</div></div><span class="badge">🎯 30 NOV 2026</span></div><div class="bar" style="margin-top:12px"><i style="width:'+Math.min(100,total/91*100)+'%"></i></div><small class="muted">Checklist global: '+total+' selesai</small>')+card('<h3>⚡ Patokan latihan</h3><div class="grid"><div class="metric"><b>10–15 mnt</b><small>Pemanasan tempo/interval</small></div><div class="metric"><b>5–10 mnt</b><small>Cooldown</small></div><div class="metric"><b>1,5–2 mnt</b><small>Antar set strength biasa</small></div><div class="metric"><b>2–4 mnt</b><small>Antar sesi 1 menit</small></div></div>')}
+function calendar(){let m=parse(current).getMonth(),y=parse(current).getFullYear(),first=new Date(y,m,1),last=new Date(y,m+1,0),cells=[];for(let i=0;i<first.getDay();i++)cells.push('<div></div>');for(let d=1;d<=last.getDate();d++){let s=iso(new Date(y,m,d)),p=dayData(s),done=checked(s+'-day'),rest=p.run.startsWith('REST');cells.push('<div class="day '+(rest?'rest ':'')+(s===current?'sel ':'')+(done?'done':'')+'" data-date="'+s+'"><div class="dayNum">'+d+'</div><div class="dayType">'+(rest?'REST':p.time+'<br>'+p.run.split(' @')[0])+'</div>'+(done?'<div class="dayCheck">✓ selesai</div>':'')+'</div>')}return card('<div class="row"><div><div class="eyebrow">PROGRAM RESMI</div><h2>'+parse(current).toLocaleDateString('id-ID',{month:'long',year:'numeric'})+'</h2></div><div class="selectRow"><button data-month="8" class="'+(m===8?'on':'')+'">Sep</button><button data-month="9" class="'+(m===9?'on':'')+'">Okt</button><button data-month="10" class="'+(m===10?'on':'')+'">Nov</button></div></div><div class="calendar">'+dow.map(x=>'<div class="dow">'+x+'</div>').join('')+cells.join('')+'</div>')+heroDay(current)}
+function week(){let d=parse(current),monday=new Date(d);let delta=(monday.getDay()+6)%7;monday.setDate(monday.getDate()-delta);let a=[];for(let i=0;i<7;i++){let x=new Date(monday);x.setDate(monday.getDate()+i);let s=iso(x),p=dayData(s),st=strength[s],rest=p.run.startsWith('REST');a.push('<div class="card '+(s===current?'today':'')+'"><div class="row"><div><b>'+x.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short'})+'</b><small class="muted">'+s+'</small></div><span class="badge '+(rest?'pillRest':'pillRun')+'">'+(rest?'REST':p.time)+'</span></div><p style="margin-bottom:6px">'+(rest?'😴 '+p.run:'🏃 '+p.run)+'</p>'+(st&&st.type!=='—'?'<div class="note"><b>💪 '+st.type+'</b><br>'+st.text+'</div>':'')+(rest?'':task(s+'-day','Selesai hari ini',checked(s+'-day'))+'</div>')}return '<div class="eyebrow">7 HARI</div><h2>Minggu yang dipilih</h2>'+a.join('')}
+function progress(){let totalRuns=db.runs.length,totalFit=db.fits.length,lastRun=db.runs[totalRuns-1],lastFit=db.fits[totalFit-1];return card('<h2>📈 Progress</h2><div class="grid4"><div class="metric"><small>Catatan lari</small><b>'+totalRuns+'</b></div><div class="metric"><small>Tes fisik</small><b>'+totalFit+'</b></div><div class="metric"><small>Hari belajar</small><b>'+new Set(db.study.map(x=>x.date)).size+'</b></div><div class="metric"><small>Jam belajar</small><b>'+db.study.reduce((a,x)=>a+Number(x.hours||0),0).toFixed(1)+'</b></div></div>')+card('<h3>🏃 Catat hasil lari</h3><div class="grid"><input id="rd" type="number" step="0.01" placeholder="Jarak km"><input id="rt" type="number" step="0.01" placeholder="Waktu menit"></div><br><button class="primary" id="saveRun">Simpan lari</button>'+(lastRun?'<p class="muted">Terakhir: '+lastRun.distance+' km • '+lastRun.minutes+' menit • pace '+lastRun.pace+' min/km</p>':'')) +card('<h3>💪 Catat tes 1 menit</h3><div class="grid4"><input id="fp" type="number" placeholder="Pull-up"><input id="fu" type="number" placeholder="Push-up"><input id="fs" type="number" placeholder="Sit-up"><input id="fw" type="number" step="0.1" placeholder="BB kg"></div><br><button class="primary" id="saveFit">Simpan hasil</button>'+(lastFit?'<p class="muted">Terakhir: Pull '+lastFit.pull+' • Push '+lastFit.push+' • Sit '+lastFit.sit+'</p>':''))}
+function study(){let h=db.study.reduce((a,x)=>a+Number(x.hours||0),0);return card('<div class="row"><div><div class="eyebrow">19.00–20.30</div><h2>📚 Study Log</h2></div><span class="badge">'+new Set(db.study.map(x=>x.date)).size+' hari</span></div><div class="grid"><input id="sub" placeholder="Mata pelajaran"><input id="mat" placeholder="Materi"><input id="hrs" type="number" step="0.1" placeholder="Durasi jam (1.5)"><textarea id="sum" rows="3" placeholder="Kesimpulan: apa yang gua pahami?"></textarea></div><br><textarea id="weak" rows="3" placeholder="Materi yang belum dikuasai"></textarea><br><br><button class="primary" id="saveStudy">💾 Simpan catatan</button><p class="muted">Total belajar: '+h.toFixed(1)+' jam</p>')+card('<h3>📝 Rekap materi</h3>'+(db.study.length?db.study.slice().reverse().map(x=>'<div class="task"><span><b>'+x.subject+' • '+x.material+'</b><small>'+x.date+' • '+x.hours+' jam<br>Kesimpulan: '+x.summary+'<br><span class="danger">Belum dikuasai: '+(x.weak||'-')+'</span></small></span></div>').join(''):'<p class="muted">Belum ada catatan. Isi setelah sesi belajar.</p>'))}
+function prayer(){let s=iso(new Date()),p=db.prayers[s]||{};return card('<div class="eyebrow">BEKASI</div><h2>🕌 Sholat 5 Waktu</h2>'+['Subuh','Dzuhur','Ashar','Maghrib','Isya'].map(n=>task('p-'+n,n,p[n])).join('')+'<p class="muted">Checklist pribadi. Waktu sholat mengikuti jadwal setempat.</p>')}
+function rules(){return card('<h2>⚡ Rules</h2><div class="note"><b>ANTAR REPETISI</b><br>Nggak perlu istirahat; repetisi berurutan dengan teknik dan ritme rapi.</div><div class="note" style="margin-top:9px"><b>STRENGTH BIASA</b><br>1,5–2 menit antar set. Kalau set berat dan napas belum pulih, boleh 2–3 menit.</div><div class="note" style="margin-top:9px"><b>LATIHAN 1 MENIT</b><br>Istirahat 2–4 menit antar set.</div><div class="note" style="margin-top:9px"><b>TEMPO / INTERVAL</b><br>Pemanasan 10–15 menit. Cooldown 5–10 menit. Tempo seperti 3×1 km: recovery 2–3 menit jalan/jogging ringan.</div><div class="note" style="margin-top:9px"><b>SUBMAKSIMAL</b><br>Berhenti saat masih punya kira-kira 2 repetisi cadangan. Jangan failure.</div><div class="note" style="margin-top:9px"><b>30 NOV</b><br>TES 12 menit + Pull-up 21 + Push-up 45 + Sit-up 45. Antar tes 5–10 menit.</div><p class="danger">Kalau muncul nyeri tajam, hentikan latihan.</p>')}
+function render(v){current=current||iso(new Date());document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));V.innerHTML=v==='home'?home():v==='calendar'?calendar():v==='week'?week():v==='progress'?progress():v==='study'?study():v==='prayer'?prayer():rules()}
+T.addEventListener('click',e=>{let b=e.target.closest('[data-view]');if(b)render(b.dataset.view);let mb=e.target.closest('[data-month]');if(mb){let d=parse(current);d.setMonth(Number(mb.dataset.month),1);current=iso(d);render('calendar')}});V.addEventListener('click',e=>{let day=e.target.closest('.day');if(day){current=day.dataset.date;render('calendar')}if(e.target.id==='saveRun'){let d=+document.getElementById('rd').value,t=+document.getElementById('rt').value;if(d&&t){db.runs.push({date:iso(new Date()),distance:d,minutes:t,pace:(t/d).toFixed(2)});save();render('progress')}}if(e.target.id==='saveFit'){db.fits.push({date:iso(new Date()),pull:+document.getElementById('fp').value||0,push:+document.getElementById('fu').value||0,sit:+document.getElementById('fs').value||0});save();render('progress')}if(e.target.id==='saveStudy'){let subject=document.getElementById('sub').value.trim(),material=document.getElementById('mat').value.trim(),summary=document.getElementById('sum').value.trim();if(subject&&material&&summary){db.study.push({date:iso(new Date()),subject,material,summary,weak:document.getElementById('weak').value,hours:+document.getElementById('hrs').value||0});save();render('study')}}});V.addEventListener('change',e=>{if(e.target.dataset.id){db.checks[e.target.dataset.id]=e.target.checked;save();render(document.querySelector('.tabs .on').dataset.view)}if(e.target.dataset.id&&e.target.dataset.id.startsWith('p-')){let s=iso(new Date()),p=db.prayers[s]||{};p[e.target.dataset.id.slice(2)]=e.target.checked;db.prayers[s]=p;save()}});document.getElementById('weightBtn').onclick=()=>{let w=prompt('Berat badan sekarang (kg):',db.weight);if(w){db.weight=w;save()}};save();render('home');})();</script><script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script></body></html>
