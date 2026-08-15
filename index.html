@@ -1,2 +1,171 @@
-<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BINJAS ALIF</title><style>body{margin:0;padding:12px;background:#0b1018;color:#fff;font:16px system-ui}main{max-width:700px;margin:auto}.hero,.card{background:#141c29;border:1px solid #2d3a50;border-radius:16px;padding:15px;margin:10px 0}.tabs{display:flex;gap:6px;overflow:auto;position:sticky;top:0;background:#0b1018;padding:8px 0;z-index:3}button{border:1px solid #344158;background:#1b2636;color:#fff;border-radius:10px;padding:10px;font-weight:700}.on,.primary{background:#8bff6a;color:#071008}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.metric{background:#ffffff09;padding:10px;border-radius:11px}.task{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff12}.task input{width:21px;height:21px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{min-height:60px;background:#101722;border:1px solid #2d3a50;border-radius:8px;padding:5px;font-size:10px;cursor:pointer}.sel{border-color:#8bff6a}.done{background:#17321d}.muted{color:#9ca8bb}input,textarea{width:100%;box-sizing:border-box;margin:4px 0;padding:10px;border-radius:9px;border:1px solid #344158;background:#0b1018;color:#fff}</style><main><section class="hero"><b>BINJAS ALIF 🔥</b><h1>Build. Run. Repeat.</h1><p class="muted">September–November 2026</p><div class="grid"><div class="metric"><b>3,2 km</b><br>12 menit</div><div class="metric"><b>21</b><br>Pull-up</div><div class="metric"><b>45</b><br>Push-up</div><div class="metric"><b>45</b><br>Sit-up</div></div></section><nav class="tabs" id="tabs"><button data-v="home" class="on">🏠 Home</button><button data-v="cal">🗓️ Jadwal</button><button data-v="week">📅 Mingguan</button><button data-v="study">📚 Belajar</button><button data-v="fit">📈 Progress</button><button data-v="pray">🕌 Sholat</button></nav><div id="view"></div></main><script>
-const dates={};for(let d=1;d<=30;d++)dates['2026-09-'+String(d).padStart(2,'0')]=1;for(let d=1;d<=31;d++)dates['2026-10-'+String(d).padStart(2,'0')]=1;for(let d=1;d<=30;d++)dates['2026-11-'+String(d).padStart(2,'0')]=1;const plans={};Object.keys(dates).forEach(k=>{let d=new Date(k+'T12:00:00'),w=d.getDay();plans[k]=[d.toLocaleDateString('id-ID',{weekday:'long'}),w===1||w===5?'REST':w===2?'TEMPO / INTERVAL':w===3?'EASY':w===4?'INTERVAL':w===6?'LONG':'RECOVERY',w===1||w===5?'—':'05.30']});plans['2026-09-01']=['Selasa','Easy 5 km @ 5:50–6:30','05.30'];plans['2026-09-02']=['Rabu','6×400 m @ 4:20–4:40','05.15'];plans['2026-09-03']=['Kamis','Easy 4 km @ 5:50–6:30','05.30'];plans['2026-09-05']=['Sabtu','Long 7 km @ 6:00–6:30','05.00'];plans['2026-09-06']=['Minggu','Recovery 4 km @ 6:20–6:50','05.45'];plans['2026-11-30']=['Senin','TES 12 MENIT — TARGET 3,2 KM','05.30'];let selected='2026-09-01',done=JSON.parse(localStorage.binjasDone||'{}'),study=JSON.parse(localStorage.binjasStudy||'[]'),fit=JSON.parse(localStorage.binjasFit||'[]');function save(){localStorage.binjasDone=JSON.stringify(done);localStorage.binjasStudy=JSON.stringify(study);localStorage.binjasFit=JSON.stringify(fit)}function task(id,text){return `<label class="task"><input type="checkbox" data-id="${id}" ${done[id]?'checked':''}><span>${text}</span></label>`}function detail(k){let p=plans[k];return `<section class="card"><b>${p[0]} • ${k}</b><h2>🏃 ${p[1]}</h2><p>⏰ ${p[2]} WIB</p>${task(k,'Latihan hari ini selesai')}</section>`}function home(){return detail(selected)+`<section class="card"><h3>🎯 Target akhir</h3><p>3,2 km / 12 menit • Pull-up 21 • Push-up 45 • Sit-up 45</p></section>`}function cal(){let h='<section class="card"><h2>🗓️ Kalender</h2><div class="calendar">';Object.keys(dates).forEach(k=>{h+=`<div class="day ${k===selected?'sel ':''}${done[k]?'done':''}" data-day="${k}"><b>${k.slice(-2)}</b><br>${plans[k][1].split(' @')[0]}${done[k]?' ✓':''}</div>`});return h+'</div></section>'+detail(selected)}function week(){return Object.keys(plans).filter(k=>k>=selected).slice(0,7).map(k=>detail(k)).join('')}function studyView(){return `<section class="card"><h2>📚 Belajar 19.00–20.30</h2><input id="sub" placeholder="Mata pelajaran"><input id="mat" placeholder="Materi"><input id="hrs" type="number" step="0.5" placeholder="Jam"><textarea id="sum" placeholder="Kesimpulan materi"></textarea><textarea id="weak" placeholder="Materi belum dikuasai"></textarea><button class="primary" id="saveStudy">Simpan</button><p>Total hari: ${new Set(study.map(x=>x.d)).size} • Total jam: ${study.reduce((a,x)=>a+x.h,0).toFixed(1)}</p></section>`}function fitView(){return `<section class="card"><h2>📈 Progress</h2><input id="pull" type="number" placeholder="Pull-up"><input id="push" type="number" placeholder="Push-up"><input id="sit" type="number" placeholder="Sit-up"><button class="primary" id="saveFit">Simpan hasil</button></section>`}function pray(){return `<section class="card"><h2>🕌 Sholat 5 Waktu</h2>${['Subuh','Dzuhur','Ashar','Maghrib','Isya'].map(x=>task('p'+x,x)).join('')}</section>`}function render(v){document.querySelectorAll('[data-v]').forEach(x=>x.classList.toggle('on',x.dataset.v===v));view.innerHTML=v==='home'?home():v==='cal'?cal():v==='week'?week():v==='study'?studyView():v==='fit'?fitView():pray()}tabs.onclick=e=>{let b=e.target.closest('[data-v]');if(b)render(b.dataset.v)};view.onclick=e=>{let d=e.target.closest('[data-day]');if(d){selected=d.dataset.day;render('cal')}if(e.target.id==='saveStudy'){study.push({d:new Date().toISOString().slice(0,10),h:+hrs.value||0});save();render('study')}if(e.target.id==='saveFit'){fit.push({d:new Date().toISOString().slice(0,10),p:+pull.value||0,u:+push.value||0,s:+sit.value||0});save();render('fit')}};view.onchange=e=>{if(e.target.dataset.id){done[e.target.dataset.id]=e.target.checked;save()}};render('home');</script>
+<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1018"><title>BINJAS ALIF • 3 Bulan</title><style>body{margin:0;padding:12px;background:#0b1018;color:#f5f7fb;font:15px system-ui}main{max-width:760px;margin:auto}.hero,.card{background:#141c29;border:1px solid #2d3a50;border-radius:18px;padding:15px;margin:10px 0}.hero{background:linear-gradient(135deg,#172438,#13271b)}h1{margin:5px 0}.muted{color:#9ca8bb}.tabs{display:flex;gap:6px;overflow:auto;position:sticky;top:0;background:#0b1018;padding:8px 0;z-index:5}.tabs button,button{border:1px solid #344158;background:#1b2636;color:#fff;border-radius:11px;padding:10px 12px;font-weight:700;white-space:nowrap}.on,.primary{background:#8bff6a!important;color:#071008!important}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{background:#ffffff0b;padding:11px;border-radius:12px;text-align:center}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{min-height:70px;background:#101722;border:1px solid #2d3a50;border-radius:9px;padding:5px;font-size:10px;cursor:pointer}.day:hover,.sel{border-color:#8bff6a}.done{background:#17321d}.task{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #ffffff12}.task input{width:21px;height:21px;accent-color:#8bff6a}input,textarea{width:100%;box-sizing:border-box;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #344158;background:#0b1018;color:#fff}.run{font-size:17px}.strength{background:#ffffff08;border-radius:12px;padding:11px;margin-top:10px}.rest{color:#aab4c4}.month{font-weight:800;font-size:18px}@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}} </style><main><section class="hero"><b>BINJAS ALIF 🔥</b><h1>Build. Run. Repeat.</h1><p class="muted">Program resmi 1 September – 30 November 2026</p><div class="grid"><div class="metric"><b>3.200 m</b><br>12:00</div><div class="metric"><b>21</b><br>Pull-up / 1 mnt</div><div class="metric"><b>45</b><br>Push-up / 1 mnt</div><div class="metric"><b>45</b><br>Sit-up / 1 mnt</div></div></section><nav class="tabs" id="tabs"><button class="on" data-v="home">🏠 Home</button><button data-v="cal">🗓️ Jadwal</button><button data-v="week">📅 Mingguan</button><button data-v="study">📚 Belajar</button><button data-v="fit">📈 Progress</button><button data-v="pray">🕌 Sholat</button></nav><div id="view"></div></main><script>
+const run=`2026-09-01|Selasa|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-02|Rabu|05.15|6×400 m @ 4:20–4:40|—
+2026-09-03|Kamis|05.30|Easy 4 km @ 5:50–6:30|B
+2026-09-04|Jumat|—|REST|—
+2026-09-05|Sabtu|05.00|Long 7 km @ 6:00–6:30|—
+2026-09-06|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-07|Senin|—|REST|—
+2026-09-08|Selasa|05.15|Tempo 3×1 km @ 5:10–5:30|B
+2026-09-09|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-10|Kamis|05.15|8×400 m @ 4:20–4:40|—
+2026-09-11|Jumat|—|REST|—
+2026-09-12|Sabtu|05.00|Long 8 km @ 6:00–6:30|—
+2026-09-13|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-14|Senin|—|REST|—
+2026-09-15|Selasa|05.15|Tempo 4×1 km @ 5:10–5:30|B
+2026-09-16|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-17|Kamis|05.15|5×600 m @ 4:20–4:40|—
+2026-09-18|Jumat|—|REST|—
+2026-09-19|Sabtu|05.00|Long 9 km @ 6:00–6:30|—
+2026-09-20|Minggu|05.30|Easy 5 km @ 5:50–6:30|C
+2026-09-21|Senin|—|REST|—
+2026-09-22|Selasa|05.15|Tempo 20 menit @ 5:10–5:30|B
+2026-09-23|Rabu|05.30|Easy 5 km @ 5:50–6:30|A
+2026-09-24|Kamis|05.15|10×400 m @ 4:20–4:40|—
+2026-09-25|Jumat|—|REST|—
+2026-09-26|Sabtu|05.00|Long 8 km @ 6:00–6:30|—
+2026-09-27|Minggu|05.45|Recovery 4 km @ 6:20–6:50|C
+2026-09-28|Senin|—|REST|—
+2026-09-29|Selasa|05.15|Tempo 3×1,2 km @ 5:10–5:30|B
+2026-09-30|Rabu|05.30|Easy 4 km @ 5:50–6:30|A
+2026-10-01|Kamis|05.15|6×400 m @ 4:00–4:20|—
+2026-10-02|Jumat|—|REST|—
+2026-10-03|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-10-04|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-10-05|Senin|—|REST|—
+2026-10-06|Selasa|05.15|Tempo 3×1 km @ 4:45–5:00|B
+2026-10-07|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-08|Kamis|05.15|5×800 m @ 4:00–4:20|—
+2026-10-09|Jumat|—|REST|—
+2026-10-10|Sabtu|05.00|Long 10 km @ 5:50–6:20|—
+2026-10-11|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-10-12|Senin|—|REST|—
+2026-10-13|Selasa|05.15|Tempo 4×1 km @ 4:45–5:00|B
+2026-10-14|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-15|Kamis|05.15|8×400 m @ 4:00–4:20|—
+2026-10-16|Jumat|—|REST|—
+2026-10-17|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-10-18|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-10-19|Senin|—|REST|—
+2026-10-20|Selasa|05.15|Tempo 20–25 mnt @ 4:45–5:00|B
+2026-10-21|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-10-22|Kamis|05.15|6×600 m @ 4:00–4:20|—
+2026-10-23|Jumat|—|REST|—
+2026-10-24|Sabtu|05.00|Long 10 km @ 5:50–6:20|—
+2026-10-25|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-10-26|Senin|—|REST|—
+2026-10-27|Selasa|05.15|Tempo 3×1,5 km @ 4:45–5:00|B
+2026-10-28|Rabu|05.30|Easy 4 km @ 5:45–6:20|A
+2026-10-29|Kamis|05.15|10×400 m @ 4:00–4:20|—
+2026-10-30|Jumat|—|REST|—
+2026-10-31|Sabtu|05.00|Long 8 km @ 5:50–6:20|—
+2026-11-01|Minggu|05.30|Easy 5 km @ 5:45–6:20|C
+2026-11-02|Senin|—|REST|—
+2026-11-03|Selasa|05.15|5×600 m @ 3:45–4:00|B ringan
+2026-11-04|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-05|Kamis|05.15|Tempo 3×1 km @ 4:10–4:30|—
+2026-11-06|Jumat|—|REST|—
+2026-11-07|Sabtu|05.00|Long 9 km @ 5:50–6:20|—
+2026-11-08|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-11-09|Senin|—|REST|—
+2026-11-10|Selasa|05.15|8×400 m @ 3:45–4:00|B ringan
+2026-11-11|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-12|Kamis|05.15|Tempo 2×1,5 km @ 4:10–4:30|—
+2026-11-13|Jumat|—|REST|—
+2026-11-14|Sabtu|05.00|Long 8 km @ 5:50–6:20|—
+2026-11-15|Minggu|05.30|Easy 4 km @ 5:45–6:20|C
+2026-11-16|Senin|—|REST|—
+2026-11-17|Selasa|05.15|4×800 m @ 3:45–4:00|B
+2026-11-18|Rabu|05.30|Easy 5 km @ 5:45–6:20|A
+2026-11-19|Kamis|05.15|Tempo 3 km @ 4:10–4:30|—
+2026-11-20|Jumat|—|REST|—
+2026-11-21|Sabtu|05.00|Long 7 km @ 5:50–6:20|—
+2026-11-22|Minggu|05.45|Recovery 4 km @ 6:15–6:45|C
+2026-11-23|Senin|—|REST|—
+2026-11-24|Selasa|05.15|6×400 m @ 3:40–3:50|B sangat ringan
+2026-11-25|Rabu|05.30|Easy 4 km @ 5:45–6:20|A ringan
+2026-11-26|Kamis|05.15|3×800 m @ 3:45–3:50|—
+2026-11-27|Jumat|—|REST TOTAL|—
+2026-11-28|Sabtu|05.30|Easy 5 km + strides|—
+2026-11-29|Minggu|—|REST TOTAL|—
+2026-11-30|Senin|05.30|TES 12 MENIT — TARGET 3,2 KM @ 3:45/km|TES 21/45/45`.split('\n').map(x=>{let a=x.split('|');return {d:a[0],day:a[1],time:a[2],run:a[3],type:a[4]}});
+const strength=`2026-09-01|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-03|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-06|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-08|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-09|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-13|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-15|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-16|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-20|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-22|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-23|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-27|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-29|B|Pull-up 5×5–7 • Push-up 4×18–20 • Sit-up 4×20–25
+2026-09-30|A|Pull-up 4×6–8 • Push-up 4×15–18 • Sit-up 4×20–24
+2026-10-04|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-06|B|Pull-up 5×5–7 • Push-up 3×20–25 • Sit-up 3×22–27
+2026-10-07|A|Pull-up 5×6–8 • Push-up 4×16–20 • Sit-up 4×20–25
+2026-10-11|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-13|B|Pull-up 4×6–8 • Push-up 3×22–25 • Sit-up 3×25–28
+2026-10-14|A|Pull-up 5×6–8 • Push-up 4×18–22 • Sit-up 4×22–25
+2026-10-18|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-20|B|Pull-up 4×6–8 • Push-up 3×22–27 • Sit-up 3×25–30
+2026-10-21|A|Pull-up 5×7–9 • Push-up 4×18–22 • Sit-up 4×22–27
+2026-10-25|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-27|B|Pull-up 4×6–8 • 1 menit Push-up ×2 (28–35/set) • 1 menit Sit-up ×2 (28–35/set)
+2026-10-28|A|Pull-up 5×7–9 • Push-up 4×20–23 • Sit-up 4×23–27
+2026-11-01|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-03|B ringan|Pull-up 4×6–8 • 1 menit Push-up ×2 (30–36) • 1 menit Sit-up ×2 (30–36)
+2026-11-04|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-08|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-10|B ringan|Pull-up 4×6–8 • 1 menit Push-up ×2 (32–38) • 1 menit Sit-up ×2 (32–38)
+2026-11-11|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-15|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-17|B|Pull-up 4×7–9 • 1 menit Push-up ×2 (35–40) • 1 menit Sit-up ×2 (35–40)
+2026-11-18|A|Pull-up 4×8–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-22|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-24|B sangat ringan|Pull-up 3×5–6 • 1 menit Push-up ×1 (30–35) • 1 menit Sit-up ×1 (30–35)
+2026-11-25|A ringan|Pull-up 3×6–8 • Push-up 3×18–20 • Sit-up 3×18–22
+2026-11-30|TES|1 menit Pull-up → istirahat 5–10 menit → 1 menit Push-up → istirahat 5–10 menit → 1 menit Sit-up. Target 21/45/45`.split('\n').map(x=>{let a=x.split('|');return {type:a[1],text:a[2]}});
+const sm={};`2026-09-01|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-03|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-06|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-08|B|Pull-up 5×4–6 • Push-up 4×15–18 • Sit-up 4×18–22
+2026-09-09|A|Pull-up 4×5–7 • Push-up 4×12–15 • Sit-up 4×15–20
+2026-09-13|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-15|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-16|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-20|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-22|B|Pull-up 5×5–7 • Push-up 4×16–20 • Sit-up 4×20–24
+2026-09-23|A|Pull-up 4×6–8 • Push-up 4×14–17 • Sit-up 4×18–22
+2026-09-27|C|Pull-up 3×submaksimal • Push-up 3×submaksimal • Sit-up 3×submaksimal
+2026-09-29|B|Pull-up 5×5–7 • Push-up 4×18–20 • Sit-up 4×20–25
+2026-09-30|A|Pull-up 4×6–8 • Push-up 4×15–18 • Sit-up 4×20–24
+2026-10-04|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-06|B|Pull-up 5×5–7 • Push-up 3×20–25 • Sit-up 3×22–27
+2026-10-07|A|Pull-up 5×6–8 • Push-up 4×16–20 • Sit-up 4×20–25
+2026-10-11|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-13|B|Pull-up 4×6–8 • Push-up 3×22–25 • Sit-up 3×25–28
+2026-10-14|A|Pull-up 5×6–8 • Push-up 4×18–22 • Sit-up 4×22–25
+2026-10-18|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-20|B|Pull-up 4×6–8 • Push-up 3×22–27 • Sit-up 3×25–30
+2026-10-21|A|Pull-up 5×7–9 • Push-up 4×18–22 • Sit-up 4×22–27
+2026-10-25|C|Pull-up 3×submaksimal • Push-up 3×20 • Sit-up 3×25
+2026-10-27|B|Pull-up 4×6–8 • 1 menit Push-up ×2 (28–35/set) • 1 menit Sit-up ×2 (28–35/set)
+2026-10-28|A|Pull-up 5×7–9 • Push-up 4×20–23 • Sit-up 4×23–27
+2026-11-01|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-03|B ringan|Pull-up 4×6–8 • 1 menit Push-up ×2 (30–36) • 1 menit Sit-up ×2 (30–36)
+2026-11-04|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-08|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-10|B ringan|Pull-up 4×6–8 • 1 menit Push-up ×2 (32–38) • 1 menit Sit-up ×2 (32–38)
+2026-11-11|A|Pull-up 4×7–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-15|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-17|B|Pull-up 4×7–9 • 1 menit Push-up ×2 (35–40) • 1 menit Sit-up ×2 (35–40)
+2026-11-18|A|Pull-up 4×8–10 • Push-up 4×20–25 • Sit-up 4×20–25
+2026-11-22|C|Pull-up 3×submaksimal • Push-up 2×30 • Sit-up 2×30
+2026-11-24|B sangat ringan|Pull-up 3×5–6 • 1 menit Push-up ×1 (30–35) • 1 menit Sit-up ×1 (30–35)
+2026-11-25|A ringan|Pull-up 3×6–8 • Push-up 3×18–20 • Sit-up 3×18–22
+2026-11-30|TES|1 menit Pull-up → istirahat 5–10 menit → 1 menit Push-up → istirahat 5–10 menit → 1 menit Sit-up. Target 21/45/45`.split('\n').forEach(x=>{let a=x.split('|');sm[a[0]]={type:a[1],text:a[2]}});
+let selected='2026-09-01',done=JSON.parse(localStorage.binjasDone||'{}'),study=JSON.parse(localStorage.binjasStudy||'[]'),fit=JSON.parse(localStorage.binjasFit||'[]'),pray=JSON.parse(localStorage.binjasPray||'{}');const view=document.getElementById('view');function save(){localStorage.binjasDone=JSON.stringify(done);localStorage.binjasStudy=JSON.stringify(study);localStorage.binjasFit=JSON.stringify(fit);localStorage.binjasPray=JSON.stringify(pray)}function task(id,text){return `<label class="task"><input type="checkbox" data-id="${id}" ${done[id]?'checked':''}><span>${text}</span></label>`}function detail(k){let p=run.find(x=>x.d===k),s=sm[k];return `<section class="card"><b>${p.day} • ${k}</b><h2 class="run">🏃 ${p.run}</h2><p>⏰ ${p.time} WIB</p>${s?`<div class="strength"><b>💪 Strength ${s.type}</b><br>${s.text}</div>`:''}${task(k,'Selesai latihan hari ini')}</section>`}function home(){return detail(selected)+`<section class="card"><h3>📌 Aturan program</h3><p>Tempo/interval: pemanasan 10–15 menit (jogging ringan + dynamic warm-up), sesi utama, cooldown 5–10 menit. Tempo seperti 3×1 km: recovery 2–3 menit jalan/jogging ringan.</p><p>Strength dilakukan setelah lari pada hari yang punya strength. Jangan sampai failure; submaksimal berarti masih sanggup sekitar 2 repetisi lagi. Sesi 1 menit: istirahat 2–4 menit antars et.</p></section>`}function cal(){let h='<section class="card"><h2>🗓️ Kalender 3 Bulan</h2><div class="calendar">';run.forEach(p=>{h+=`<div class="day ${p.d===selected?'sel ':''}${done[p.d]?'done':''}" data-day="${p.d}"><b>${p.d.slice(8)}</b><br>${p.run.split(' @')[0]}${sm[p.d]?'<br>💪 '+sm[p.d].type:''}${done[p.d]?' ✓':''}</div>`});return h+'</div></section>'+detail(selected)}function week(){let i=run.findIndex(x=>x.d===selected);if(i<0)i=0;return `<section class="card"><h2>📅 Mingguan</h2><p class="muted">Minggu mulai ${run[i].d}</p></section>`+run.slice(i,i+7).map(p=>detail(p.d)).join('')}function studyView(){return `<section class="card"><h2>📚 Belajar 19.00–20.30</h2><input id="sub" placeholder="Mata pelajaran"><input id="mat" placeholder="Materi"><input id="hrs" type="number" step="0.5" placeholder="Jam belajar"><textarea id="sum" placeholder="Kesimpulan materi setelah belajar"></textarea><textarea id="weak" placeholder="Materi yang belum dikuasai"></textarea><button class="primary" id="saveStudy">Simpan materi</button><p>Total hari belajar: ${new Set(study.map(x=>x.d)).size}<br>Total jam belajar: ${study.reduce((a,x)=>a+x.h,0).toFixed(1)} jam</p></section>`+study.slice().reverse().map(x=>`<section class="card"><b>${x.sub||'Materi'} — ${x.mat||''}</b><p>${x.h} jam</p><p>Kesimpulan: ${x.sum||'-'}</p><p class="muted">Belum dikuasai: ${x.weak||'-'}</p></section>`).join('')}function fitView(){return `<section class="card"><h2>📈 Progress Tes</h2><p>Target akhir: 3,2 km/12 menit • Pull-up 21 • Push-up 45 • Sit-up 45</p><input id="pull" type="number" placeholder="Pull-up / 1 menit"><input id="push" type="number" placeholder="Push-up / 1 menit"><input id="sit" type="number" placeholder="Sit-up / 1 menit"><button class="primary" id="saveFit">Simpan hasil</button></section>`+fit.slice().reverse().map(x=>`<section class="card">${x.d}<br>Pull-up: ${x.p} • Push-up: ${x.u} • Sit-up: ${x.s}</section>`).join('')}function prayView(){return `<section class="card"><h2>🕌 Sholat 5 Waktu</h2>${['Subuh','Dzuhur','Ashar','Maghrib','Isya'].map(x=>task('pray-'+x,x)).join('')}</section>`}function render(v){document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));view.innerHTML=v==='home'?home():v==='cal'?cal():v==='week'?week():v==='study'?studyView():v==='fit'?fitView():prayView()}document.getElementById('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-v]');if(b)render(b.dataset.v)});view.addEventListener('click',e=>{let d=e.target.closest('[data-day]');if(d){selected=d.dataset.day;render('cal')}if(e.target.id==='saveStudy'){study.push({d:new Date().toISOString().slice(0,10),sub:document.getElementById('sub').value,mat:document.getElementById('mat').value,h:+document.getElementById('hrs').value||0,sum:document.getElementById('sum').value,weak:document.getElementById('weak').value});save();render('study')}if(e.target.id==='saveFit'){fit.push({d:new Date().toISOString().slice(0,10),p:+document.getElementById('pull').value||0,u:+document.getElementById('push').value||0,s:+document.getElementById('sit').value||0});save();render('fit')}});view.addEventListener('change',e=>{if(e.target.dataset.id){done[e.target.dataset.id]=e.target.checked;save();if(e.target.dataset.id.startsWith('pray-'))pray[e.target.dataset.id]=e.target.checked;render(document.querySelector('.tabs .on')?.dataset.v||'home')}});render('home');</script>
