@@ -1,11 +1,4 @@
-// BINJAS ALIF: disable legacy service worker so the app always loads the current GitHub Pages files.
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => caches.delete(k)));
-    await self.registration.unregister();
-    const clients = await self.clients.matchAll({type:'window'});
-    clients.forEach(client => client.postMessage({type:'BINJAS_REFRESH'}));
-  })());
-});
+const CACHE='binjas-alif-v8';
+self.addEventListener('install',e=>e.waitUntil(self.skipWaiting()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.pathname.endsWith('/index.html')||u.pathname.endsWith('/')){e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});const html=await r.text();const fix='<script>window.card=window.card||function(x){return \'<section class="card">\'+x+\'</section>\'};</script>';const out=html.includes('window.card=')?html:html.replace('<script>(function(){',fix+'<script>(function(){');return new Response(out,{status:r.status,statusText:r.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}})}catch(err){return caches.match(e.request)}})())}});});
